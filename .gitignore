@@ -1,0 +1,8 @@
+# .gitignore
+
+/Soundpad/build/
+/Soundpad/.vscode/
+.vscode/
+*.swp
+*.swo
+
