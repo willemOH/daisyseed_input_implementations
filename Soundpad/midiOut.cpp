@@ -1,6 +1,7 @@
 #include "daisy_seed.h"
 #include "daisysp.h"   
 #include "MidiExtensions.hpp"
+#include "SwitchesSend.cpp"
 
 // Use the daisy namespace to prevent having to type
 // daisy:: before all libdaisy functions
@@ -11,7 +12,7 @@ using namespace daisy;
 // Declare a DaisySeed object called hardware
 DaisySeed hw;
 MidiUsbHandler midi;
-ShiftRegister4021<2> switch_sr;
+ShiftRegister4021<1> switch_sr;
 
 int main(void)
 {
@@ -23,7 +24,7 @@ int main(void)
     midi.Init(midi_cfg);
     MidiSender send(midi);
 
-    ShiftRegister4021<2>::Config switch_sr_cfg;
+    ShiftRegister4021<1>::Config switch_sr_cfg;
     switch_sr_cfg.clk = seed::D27;
     switch_sr_cfg.data[0] = seed::D28;
     switch_sr_cfg.latch = seed::D29; //using midiusbtransmit pin, won't be needing
@@ -33,7 +34,7 @@ int main(void)
     //buttons
     Switch buttons[8];
 
-    buttons[0].Init(hw.GetPin(17), 1000);
+    buttons[0].Init(seed::D17, 1000);
     buttons[1].Init(hw.GetPin(18), 1000);
     buttons[2].Init(hw.GetPin(19), 1000);
     buttons[3].Init(hw.GetPin(20), 1000);
@@ -54,6 +55,8 @@ int main(void)
     float pot2Value_old = 0.0f;
     float threshold = 0.01f; 
 
+    SwitchesSend switches(switch_sr,hw,send);
+
     for(;;){
     float pot1Value = hw.adc.GetFloat(0);
     float pot2Value = hw.adc.GetFloat(1);
@@ -67,6 +70,9 @@ int main(void)
     send.MIDISendControlChange(1,9,(pot2Value*127));
     pot2Value_old = pot2Value;
     }
+
+    switches.Update();
+    
     for(int i = 0; i < 8; i++) {
         buttons[i].Debounce();
         if(buttons[i].RisingEdge()) {
