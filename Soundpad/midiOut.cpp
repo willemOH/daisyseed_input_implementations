@@ -12,7 +12,7 @@ using namespace daisy;
 // Declare a DaisySeed object called hardware
 DaisySeed hw;
 MidiUsbHandler midi;
-ShiftRegister4021<1> switch_sr;
+ShiftRegister4021<2> switch_sr;
 
 int main(void)
 {
@@ -24,7 +24,7 @@ int main(void)
     midi.Init(midi_cfg);
     MidiSender send(midi);
 
-    ShiftRegister4021<1>::Config switch_sr_cfg;
+    ShiftRegister4021<2>::Config switch_sr_cfg;
     switch_sr_cfg.clk = seed::D27;
     switch_sr_cfg.data[0] = seed::D28;
     switch_sr_cfg.latch = seed::D29; //using midiusbtransmit pin, won't be needing

@@ -6,8 +6,8 @@ using namespace daisy;
 
 class SwitchesSend {
 public: 
-        static const int NUM_PINS = 8;
-    SwitchesSend(ShiftRegister4021<1> & switch_sr, DaisySeed& hw, MidiSender& send)
+        static const int NUM_PINS = 16;
+    SwitchesSend(ShiftRegister4021<2> & switch_sr, DaisySeed& hw, MidiSender& send)
         : switch_sr_(switch_sr), hw_(hw), send_(send) {
            for (int i = 0; i < NUM_PINS; i++) {
             lastDebounceTime_[i] = 0;
@@ -32,7 +32,7 @@ public:
     }
 
 private:
-    ShiftRegister4021<1> switch_sr_;
+    ShiftRegister4021<2> switch_sr_;
     DaisySeed& hw_;
     MidiSender& send_;
     uint64_t lastDebounceTime_[NUM_PINS];
