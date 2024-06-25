@@ -25,11 +25,17 @@ int main(void)
     MidiSender send(midi);
 
     ShiftRegister4021<2>::Config switch_sr_cfg;
+    switch_sr_cfg.latch = seed::D28; 
     switch_sr_cfg.clk = seed::D27;
-    switch_sr_cfg.data[0] = seed::D28;
-    switch_sr_cfg.latch = seed::D29; //using midiusbtransmit pin, won't be needing
-
+    switch_sr_cfg.data[0] = seed::D14;
     switch_sr.Init(switch_sr_cfg);
+
+    ShiftRegister595 led_sr;
+    dsy_gpio_pin led_sr_pins[3];
+    led_sr_pins[0] = seed::D28;
+    led_sr_pins[1] = seed::D27;
+    led_sr_pins[2] = seed::D13;
+    led_sr.Init(led_sr_pins);
 
     //buttons
     Switch buttons[8];
@@ -56,6 +62,8 @@ int main(void)
     float threshold = 0.01f; 
 
     SwitchesSend switches(switch_sr,hw,send);
+    bool ledState[8] = {false};
+    
 
     for(;;){
     float pot1Value = hw.adc.GetFloat(0);
@@ -77,17 +85,50 @@ int main(void)
         buttons[i].Debounce();
         if(buttons[i].RisingEdge()) {
             send.MIDISendControlChange(1, i, 127);
+           
         }
         else if(buttons[i].FallingEdge()) {
             send.MIDISendControlChange(1, i, 0);
         }
     }
-  
+
+    for(int i=0; i < 8; i++){
+    if(ledState[i]){
+        led_sr.Set(i, true);
+     }
+    else{
+        led_sr.Set(i, false);
+    }
+    }
+        led_sr.Write();
+    /** Listen to MIDI for new changes */
+    midi.Listen();
+
+    /** When there are messages waiting in the queue... */
+    while(midi.HasEvents())
+    {
+        /** Pull the oldest one from the list... */
+        auto msg = midi.PopEvent();
+        for(int i=0;i<8;i++){
+            if(msg.data[0] == 27+i){
+                if(msg.data[1]==127)
+                ledState[i]=true;
+                else
+                ledState[i]=false;
+            }
+        }
+        
+     
+       
+    }
+
+   
+
     //If the button is pressed, turn the LED on and send a MIDI Note On event
    
     }
       //wait 1 ms
-        System::Delay(1);
+       System::Delay(1);
     }
       
 

@@ -23,7 +23,7 @@ public:
                 if((hw_.system.GetUs() - lastDebounceTime_[i]) > debounceDelay_){
                     lastDebounceTime_[i] = hw_.system.GetUs();
                     if (currentState){
-                        send_.MIDISendControlChange(1, (23 + i), 127);
+                        send_.MIDISendControlChange(1, (10 + i), 127);
                     }
                 }
             }
